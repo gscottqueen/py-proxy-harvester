@@ -21,7 +21,10 @@ def main():
     proxy_pool = re.findall(pattern, str(soup))
 
     # Print the extracted IP addresses
-    print(proxy_pool)
+    print(
+        proxy_pool,
+        end="\n\n",
+    )
 
     # Retrieve a random index proxy (we need the index to delete it if not working)
     def random_proxy():
@@ -38,7 +41,11 @@ def main():
         req = Request("https://icanhazip.com/")
         req.set_proxy(proxy, "http")
         req.add_header("User-Agent", ua.random)
-        print("request", vars(req))
+        print(
+            "request",
+            vars(req),
+            end="\n\n",
+        )
 
         # Every 10 requests, generate a new proxy
         if n % 10 == 0:
@@ -54,7 +61,10 @@ def main():
             print(f"Proxy: {proxy}")
 
             del proxy_pool[proxy_index]
-            print("This Proxy is no good " + proxy + " so we deleted it from the pool.")
+            print(
+                "This Proxy is no good " + proxy + " so we deleted it from the pool.",
+                end="\n\n",
+            )
             if len(proxy_pool) == 0:
                 print("No more proxies to check...")
                 return -1
