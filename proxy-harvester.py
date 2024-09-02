@@ -1,7 +1,8 @@
-import random
+import random, re
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+
 
 # Main function
 def main():
@@ -9,18 +10,15 @@ def main():
     proxy_pool = []  # Will contain proxies [ip:port]
 
     # we want a rotating proxy system, we need to retrieve them from the beginning and we'll achieve that by scraping the site sslproxies.org
-    proxies_req = Request("https://www.us-proxy.org/")
+    proxies_req = Request(
+        "https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&country=us&protocol=http&proxy_format=ipport&format=text&anonymity=Anonymous&timeout=20000"
+    )
     proxies_req.add_header("User-Agent", ua.random)
     proxies_doc = urlopen(proxies_req).read().decode("utf8")
     soup = BeautifulSoup(proxies_doc, "html.parser")
     # print(soup)
-    free_proxies_table = soup.find(class_="table")
-
-    # parse the table for proxies
-    for row in free_proxies_table.tbody.find_all("tr"):
-        proxy_pool.append(
-            f"{row.find_all("td")[0].string}:{row.find_all("td")[1].string}"
-        )
+    pattern = r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b"
+    proxy_pool = re.findall(pattern, str(soup))
 
     # Print the extracted IP addresses
     print(proxy_pool)
@@ -34,11 +32,11 @@ def main():
     proxy = proxy_pool[proxy_index]
 
     # test to validate free_poxy list
-    for n in range(1, 100):
-        # we'll make 100 requests to icanhazip.com which will return our current IP (proxied)
-        print(proxy)
+    for n in range(1, 10):
+        # we'll make requests to icanhazip.com which will return our current IP (proxied)
+        print("checkig proxy #" + str(n) + ": " + proxy)
         req = Request("https://icanhazip.com/")
-        req.set_proxy(proxy, "https")
+        req.set_proxy(proxy, "http")
         req.add_header("User-Agent", ua.random)
 
         # Every 10 requests, generate a new proxy
@@ -49,10 +47,16 @@ def main():
         # Make the call
         try:
             my_ip = urlopen(req).read().decode("utf8")
-            print("#" + str(n) + ": " + my_ip)
-        except:  # If error, delete this proxy and find another one
+            print("This is a good proxy!! #" + str(n) + ": " + my_ip)
+        except Exception as e:  # If error, delete this proxy and find another one
+            print(f"Error: {e}")
+            print(f"Proxy: {proxy}")
+
             del proxy_pool[proxy_index]
             print("This Proxy is no good " + proxy + " so we deleted it from the pool.")
+            if len(proxy_pool) == 0:
+                print("No more proxies to check...")
+                return -1
             proxy_index = random_proxy()
             proxy = proxy_pool[proxy_index]
 
