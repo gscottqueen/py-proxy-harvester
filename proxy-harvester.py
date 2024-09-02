@@ -12,7 +12,18 @@ def main():
     # we want a rotating proxy system, we need to retrieve them from the beginning and we'll achieve that by scraping the site sslproxies.org
     proxies_req = Request(
         "https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&country=us&protocol=http&proxy_format=ipport&format=text&anonymity=Anonymous&timeout=20000"
-    )
+    )  # this isn't going to work
+
+    # we need to set up our own proxy server in an ephemerial pipeline
+    # it should:
+
+    # create a webserver with a random ip
+    # run our jobs making requests
+    # dump the information into an artifact
+    # scan the artifact for mallware
+    # if it begins to be blocked for crawling, it exits
+    # start a new one to do it again
+
     proxies_req.add_header("User-Agent", ua.random)
     proxies_doc = urlopen(proxies_req).read().decode("utf8")
     soup = BeautifulSoup(proxies_doc, "html.parser")
