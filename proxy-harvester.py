@@ -38,6 +38,7 @@ def main():
         req = Request("https://icanhazip.com/")
         req.set_proxy(proxy, "http")
         req.add_header("User-Agent", ua.random)
+        print("request", vars(req))
 
         # Every 10 requests, generate a new proxy
         if n % 10 == 0:
